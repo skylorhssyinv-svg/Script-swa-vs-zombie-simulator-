@@ -1,0 +1,497 @@
+-- [[ MVP HUB ♣️ - PREMIUM EDITION V5.3 ]] --
+_G.Aimbot = false
+_G.SpeedHack = false
+_G.SpeedValue = 16
+_G.InfJump = false
+_G.AntiAFK = false 
+
+-- Gym, Combat, Rebirth & Auto Farm Variables
+_G.AutoFlexiones = false
+_G.AutoLevantamiento = false
+_G.KillAura = false
+_G.AutoReload = false 
+_G.AutoRebirth = false
+_G.AutoFarm = false -- Tính năng siêu cấp mới
+
+-- Smooth Aimbot Variables
+_G.AimSmoothness = 5
+_G.AimFOV = 90
+_G.CurrentLanguage = "EN" -- Ép mặc định khi Execute là tiếng Anh theo yêu cầu
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local TargetGui = (gethui and gethui()) or LocalPlayer:WaitForChild("PlayerGui", 5)
+
+if TargetGui:FindFirstChild("MVP_UltimateHub") then
+    TargetGui["MVP_UltimateHub"]:Destroy()
+end
+
+------------------------------------------------------------------------
+-- 🌐 LOCALIZATION DICTIONARY
+------------------------------------------------------------------------
+local Lang = {
+    EN = {
+        tabSystem = "🏋️ Gym/Combat",
+        tabAimbot = "🎯 Aimbot",
+        tabMisc = "⚙️ Misc",
+        gymSection = "⚔️ COMBAT & GYM LOOPS",
+        moveSection = "🏃 MOVEMENT & EXTRAS",
+        themeSection = "🎨 CHANGE THEME COLOR",
+        langSection = "🌐 SELECT LANGUAGE",
+        infoSection = "👑 CREDITS INFO",
+        auraBtn = "Gun Kill Aura: ",
+        auraRange = "🎯 Aura Range (10-500):",
+        reloadBtn = "Auto Reload: ",
+        reloadDelay = "⏳ Reload Delay (1-100s):",
+        pushUpBtn = "Auto Push-Up: ",
+        liftBtn = "Auto Weight Lift: ",
+        rebBtn = "🔄 Auto Rebirth: ",
+        farmBtn = "🌾 Perfect Auto Farm AFK: ",
+        speedBtn = "Speed Hack: ",
+        speedValue = "⚡ WalkSpeed (1-100):",
+        infJumpBtn = "Infinite Jump: ",
+        antiAfkBtn = "Anti-AFK Idle: ",
+        rejoinBtn = "🔄 Quick Rejoin Server",
+        aimBtn = "Camera Aimbot: ",
+        aimRange = "🎯 Aim Distance (10-200):",
+        aimSmooth = "🌀 Aim Smoothness (1-15):",
+        aimFov = "👁️ Scope FOV Angle (30-180):",
+        on = "ON", off = "OFF"
+    },
+    VN = {
+        tabSystem = "🏋️ Gym/Combat",
+        tabAimbot = "🎯 Aimbot",
+        tabMisc = "⚙️ Hỗ Trợ",
+        gymSection = "⚔️ VÒNG LẶP CHIẾN ĐẤU & GYM",
+        moveSection = "🏃 DI CHUYỂN & TÍNH NĂNG PHỤ",
+        themeSection = "🎨 ĐỔI MÀU CHỦ ĐỀ HUB",
+        langSection = "🌐 CHỌN NGÔN NGỮ",
+        infoSection = "👑 THÔNG TIN TÁC GIẢ",
+        auraBtn = "Gun Kill Aura: ",
+        auraRange = "🎯 Tầm quét Aura (10-500):",
+        reloadBtn = "Tự Động Nạp Đạn: ",
+        reloadDelay = "⏳ Hoãn nạp đạn (1-100s):",
+        pushUpBtn = "Auto Chống Đẩy: ",
+        liftBtn = "Auto Nâng Tạ: ",
+        rebBtn = "🔄 Tự Động Tái Sinh: ",
+        farmBtn = "🌾 Auto Farm Đêm Hoàn Hảo: ",
+        speedBtn = "Speed Hack: ",
+        speedValue = "⚡ Tốc độ chạy (1-100):",
+        infJumpBtn = "Nhảy Vô Hạn: ",
+        antiAfkBtn = "Chống Treo Máy (Anti-AFK): ",
+        rejoinBtn = "🔄 Vào Lại Server nhanh",
+        aimBtn = "Camera Aimbot: ",
+        aimRange = "🎯 Khoảng cách ngắm (10-200):",
+        aimSmooth = "🌀 Tốc độ mượt (1-15):",
+        aimFov = "👁️ Góc quét FOV (30-180):",
+        on = "BẬT", off = "TẮT"
+    }
+}
+
+------------------------------------------------------------------------
+-- 🎨 UI FRAMEWORK
+------------------------------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MVP_UltimateHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = TargetGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 260, 0, 420) -- Tăng kích thước để vừa nút Auto Farm
+MainFrame.Position = UDim2.new(0.1, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Visible = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(0, 255, 127)
+MainStroke.Thickness = 1.5
+MainStroke.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(26, 26, 31)
+Title.Text = "MVP Hub ♣️"
+Title.TextColor3 = Color3.fromRGB(0, 255, 127)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 16
+Title.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = Title
+
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, 0, 0, 30)
+TabBar.Position = UDim2.new(0, 0, 0, 35)
+TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+TabBar.BorderSizePixel = 0
+TabBar.Parent = MainFrame
+
+local GymTabBtn = Instance.new("TextButton")
+GymTabBtn.Size = UDim2.new(0, 86, 1, 0)
+GymTabBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 38)
+GymTabBtn.Text = Lang[_G.CurrentLanguage].tabSystem
+GymTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+GymTabBtn.Font = Enum.Font.SourceSansBold
+GymTabBtn.TextSize = 12
+GymTabBtn.Parent = TabBar
+
+local AimbotTabBtn = Instance.new("TextButton")
+AimbotTabBtn.Size = UDim2.new(0, 86, 1, 0)
+AimbotTabBtn.Position = UDim2.new(0, 86, 0, 0)
+AimbotTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+AimbotTabBtn.Text = Lang[_G.CurrentLanguage].tabAimbot
+AimbotTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+AimbotTabBtn.Font = Enum.Font.SourceSansBold
+AimbotTabBtn.TextSize = 12
+AimbotTabBtn.Parent = TabBar
+
+local MiscTabBtn = Instance.new("TextButton")
+MiscTabBtn.Size = UDim2.new(0, 88, 1, 0)
+MiscTabBtn.Position = UDim2.new(0, 172, 0, 0)
+MiscTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+MiscTabBtn.Text = Lang[_G.CurrentLanguage].tabMisc
+MiscTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+MiscTabBtn.Font = Enum.Font.SourceSansBold
+MiscTabBtn.TextSize = 12
+MiscTabBtn.Parent = TabBar
+
+------------------------------------------------------------------------
+-- 📦 PAGES ALLOCATION
+------------------------------------------------------------------------
+local GymPage = Instance.new("ScrollingFrame")
+GymPage.Size = UDim2.new(1, -16, 1, -75)
+GymPage.Position = UDim2.new(0, 8, 0, 70)
+GymPage.BackgroundTransparency = 1
+GymPage.CanvasSize = UDim2.new(0, 0, 0, 410)
+GymPage.ScrollBarThickness = 3
+GymPage.Visible = true
+GymPage.Parent = MainFrame
+
+local GymLayout = Instance.new("UIListLayout")
+GymLayout.SortOrder = Enum.SortOrder.LayoutOrder
+GymLayout.Padding = UDim.new(0, 6)
+GymLayout.Parent = GymPage
+
+local AimbotPage = Instance.new("Frame")
+AimbotPage.Size = UDim2.new(1, -16, 1, -75)
+AimbotPage.Position = UDim2.new(0, 8, 0, 70)
+AimbotPage.BackgroundTransparency = 1
+AimbotPage.Visible = false
+AimbotPage.Parent = MainFrame
+
+local AimLayout = Instance.new("UIListLayout")
+AimLayout.SortOrder = Enum.SortOrder.LayoutOrder
+AimLayout.Padding = UDim.new(0, 6)
+AimLayout.Parent = AimbotPage
+
+local MiscPage = Instance.new("ScrollingFrame")
+MiscPage.Size = UDim2.new(1, -16, 1, -75)
+MiscPage.Position = UDim2.new(0, 8, 0, 70)
+MiscPage.BackgroundTransparency = 1
+MiscPage.CanvasSize = UDim2.new(0, 0, 0, 400)
+MiscPage.ScrollBarThickness = 3
+MiscPage.Visible = false
+MiscPage.Parent = MainFrame
+
+local MiscLayout = Instance.new("UIListLayout")
+MiscLayout.SortOrder = Enum.SortOrder.LayoutOrder
+MiscLayout.Padding = UDim.new(0, 6)
+MiscLayout.Parent = MiscPage
+
+GymTabBtn.MouseButton1Click:Connect(function()
+    GymPage.Visible = true AimbotPage.Visible = false MiscPage.Visible = false
+    GymTabBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 38) GymTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AimbotTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26) AimbotTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    MiscTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26) MiscTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+end)
+
+AimbotTabBtn.MouseButton1Click:Connect(function()
+    GymPage.Visible = false AimbotPage.Visible = true MiscPage.Visible = false
+    AimbotTabBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 38) AimbotTabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    GymTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26) GymTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    MiscTabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26) MiscTabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+end)
+
+-- --- [BUTTON CREATOR TOOLKIT] ---
+local function createButton(parent, text, color, onClick)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 28)
+    Btn.BackgroundColor3 = color
+    Btn.Text = text
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.TextSize = 13
+    Btn.Parent = parent
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 5)
+    Corner.Parent = Btn
+    Btn.MouseButton1Click:Connect(function() onClick(Btn) end)
+    return Btn
+end
+
+local function createInputRow(parent, labelText, defaultText)
+    local Row = Instance.new("Frame")
+    Row.Size = UDim2.new(1, 0, 0, 28)
+    Row.BackgroundTransparency = 1
+    Row.Parent = parent
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0, 155, 1, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = labelText
+    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Label.Font = Enum.Font.SourceSansBold
+    Label.TextSize = 13
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Row
+    local Box = Instance.new("TextBox")
+    Box.Size = UDim2.new(0, 65, 1, -2)
+    Box.Position = UDim2.new(1, -65, 0, 1)
+    Box.BackgroundColor3 = Color3.fromRGB(38, 38, 44)
+    Box.Text = defaultText
+    Box.TextColor3 = Color3.fromRGB(0, 255, 255)
+    Box.Font = Enum.Font.SourceSansBold
+    Box.TextSize = 13
+    Box.ClearTextOnFocus = false
+    Box.Parent = Row
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 4)
+    BoxCorner.Parent = Box
+    return Box, Label
+end
+
+-- --- [PAGE 1 COMPONENTS] ---
+local StatsLabel = Instance.new("TextLabel")
+StatsLabel.Size = UDim2.new(1, 0, 0, 18)
+StatsLabel.BackgroundTransparency = 1
+StatsLabel.Text = "⚡ FPS: ...  |  📡 Ping: ..."
+StatsLabel.TextColor3 = Color3.fromRGB(0, 255, 127)
+StatsLabel.Font = Enum.Font.SourceSansBold
+StatsLabel.TextSize = 13
+StatsLabel.TextXAlignment = Enum.TextXAlignment.Left
+StatsLabel.Parent = GymPage
+
+local GymSection = Instance.new("TextLabel")
+GymSection.Size = UDim2.new(1, 0, 0, 18)
+GymSection.BackgroundTransparency = 1
+GymSection.Text = Lang[_G.CurrentLanguage].gymSection
+GymSection.TextColor3 = Color3.fromRGB(255, 215, 0)
+GymSection.Font = Enum.Font.SourceSansBold
+GymSection.TextSize = 12
+GymSection.TextXAlignment = Enum.TextXAlignment.Left
+GymSection.Parent = GymPage
+
+local FarmBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.AutoFarm = not _G.AutoFarm end) -- Nút Farm đêm Lên đầu
+local AuraBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.KillAura = not _G.KillAura end)
+local KillAuraInputBox, AuraRangeLabel = createInputRow(GymPage, "", "250")
+
+local ReloadBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.AutoReload = not _G.AutoReload end)
+local ReloadDelayInputBox, ReloadDelayLabel = createInputRow(GymPage, "", "3")
+
+local PushUpBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.AutoFlexiones = not _G.AutoFlexiones end)
+local LiftBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.AutoLevantamiento = not _G.AutoLevantamiento end)
+local RebirthBtn = createButton(GymPage, "", Color3.fromRGB(150, 0, 0), function() _G.AutoRebirth = not _G.AutoRebirth end)
+
+-- --- [PAGE 2 COMPONENTS] ---
+local HubAimbotBtn = createButton(AimbotPage, "", Color3.fromRGB(150, 0, 0), function() _G.Aimbot = not _G.Aimbot end)
+local DistanceInputBox, AimDistanceLabel = createInputRow(AimbotPage, "", "100")
+local SmoothInputBox, AimSmoothLabel = createInputRow(AimbotPage, "", "5")
+local FovInputBox, AimFovLabel = createInputRow(AimbotPage, "", "90")
+
+-- --- [PAGE 3 COMPONENTS] ---
+local MoveSection = Instance.new("TextLabel")
+MoveSection.Size = UDim2.new(1, 0, 0, 18)
+MoveSection.BackgroundTransparency = 1
+MoveSection.Text = Lang[_G.CurrentLanguage].moveSection
+MoveSection.TextColor3 = Color3.fromRGB(0, 255, 255)
+MoveSection.Font = Enum.Font.SourceSansBold
+MoveSection.TextSize = 12
+MoveSection.TextXAlignment = Enum.TextXAlignment.Left
+MoveSection.Parent = MiscPage
+
+local SpeedBtn = createButton(MiscPage, "", Color3.fromRGB(150, 0, 0), function() _G.SpeedHack = not _G.SpeedHack end)
+local SpeedInputBox, SpeedLabel = createInputRow(MiscPage, "", "16")
+local InfJumpBtn = createButton(MiscPage, "", Color3.fromRGB(40, 40, 45), function() _G.InfJump = not _G.InfJump end)
+local AntiAfkBtn = createButton(MiscPage, "", Color3.fromRGB(150, 0, 0), function() _G.AntiAFK = not _G.AntiAFK end)
+local RejoinBtn = createButton(MiscPage, "", Color3.fromRGB(140, 40, 40), function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+end)
+
+------------------------------------------------------------------------
+-- PHẦN ĐỒNG BỘ CHỮ VÀ PHÍM TẮT THỜI GIAN THỰC
+------------------------------------------------------------------------
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 40, 0, 40)
+ToggleBtn.Position = UDim2.new(0.1, 0, 0.16, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ToggleBtn.Text = "♣️"
+ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 127)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 20
+ToggleBtn.Parent = ScreenGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleBtn
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(0, 255, 127)
+ToggleStroke.Thickness = 1
+ToggleStroke.Parent = ToggleBtn
+ToggleBtn.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+RunService.RenderStepped:Connect(function()
+    local data = Lang[_G.CurrentLanguage]
+    GymTabBtn.Text = data.tabSystem
+    AimbotTabBtn.Text = data.tabAimbot
+    MiscTabBtn.Text = data.tabMisc
+    GymSection.Text = data.gymSection
+    
+    local stateAura = _G.KillAura and data.on or data.off
+    local stateReload = _G.AutoReload and data.on or data.off
+    local statePush = _G.AutoFlexiones and data.on or data.off
+    local stateLift = _G.AutoLevantamiento and data.on or data.off
+    local stateRebirth = _G.AutoRebirth and data.on or data.off
+    local stateFarm = _G.AutoFarm and data.on or data.off
+    
+    FarmBtn.Text = data.farmBtn .. stateFarm
+    FarmBtn.BackgroundColor3 = _G.AutoFarm and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    
+    AuraBtn.Text = data.auraBtn .. stateAura
+    AuraBtn.BackgroundColor3 = _G.KillAura and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    AuraRangeLabel.Text = data.auraRange
+    
+    ReloadBtn.Text = data.reloadBtn .. stateReload
+    ReloadBtn.BackgroundColor3 = _G.AutoReload and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    ReloadDelayLabel.Text = data.reloadDelay
+    
+    PushUpBtn.Text = data.pushUpBtn .. statePush
+    PushUpBtn.BackgroundColor3 = _G.AutoFlexiones and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    
+    LiftBtn.Text = data.liftBtn .. stateLift
+    LiftBtn.BackgroundColor3 = _G.AutoLevantamiento and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    
+    RebirthBtn.Text = data.rebBtn .. stateRebirth
+    RebirthBtn.BackgroundColor3 = _G.AutoRebirth and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+end)
+
+------------------------------------------------------------------------
+-- ⚙️ LÕI ĐIỀU KHIỂN CHUYỂN ĐỘNG TWEEN CỐ ĐỊNH SPEED 200-500
+------------------------------------------------------------------------
+local function tweenTo(targetPos, speedValue)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    local distance = (hrp.Position - targetPos).Magnitude
+    local calculatedDuration = distance / speedValue
+    
+    -- Tạo lực kéo BodyVelocity chống rớt hoặc rung lắc vật lý khi bay xuyên map
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bv.Parent = hrp
+    
+    local tweenInfo = TweenInfo.new(calculatedDuration, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+    tween:Play()
+    tween.Completed:Wait()
+    
+    bv:Destroy()
+end
+
+------------------------------------------------------------------------
+-- 🛡️ LÕI AUTO WEAPON BUYER & EQUIPPER (KIỂM TRA VŨ KHÍ SAU REBIRTH)
+------------------------------------------------------------------------
+local function checkAndEquipWeapon()
+    local char = LocalPlayer.Character
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+    
+    local hasWeapon = false
+    -- Kiểm tra xem trên người hoặc trong balo có khẩu súng nào không
+    if char then
+        for _, v in ipairs(char:GetChildren()) do
+            if v:IsA("Tool") then hasWeapon = true break end
+        end
+    end
+    if not hasWeapon and backpack then
+        for _, v in ipairs(backpack:GetChildren()) do
+            if v:IsA("Tool") then
+                hasWeapon = true
+                -- Nếu súng nằm trong balo, tự động lôi ra tay cầm luôn
+                v.Parent = char
+                break
+            end
+        end
+    end
+    
+    -- Nếu không phát hiện có súng (vừa Rebirth xong bị xóa sạch vũ khí)
+    if not hasWeapon then
+        pcall(function()
+            -- Gửi gói tin mua vũ khí hồi sinh tự động (Thử mua HK416 trước, nếu không được mua Barrett)
+            game:GetService("ReplicatedStorage").ShopRemote:FireServer("equipRebirthWeapon", "HK416BUY")
+            task.wait(0.5)
+            game:GetService("ReplicatedStorage").ShopRemote:FireServer("equipRebirthWeapon", "BarrettBUY")
+            task.wait(0.5)
+            
+            -- Lôi vũ khí mới mua ra tay cầm ngay lập tức
+            if backpack then
+                local newTool = backpack:FindFirstChildOfClass("Tool")
+                if newTool and char then
+                    newTool.Parent = char
+                end
+            end
+        end)
+    end
+end
+
+------------------------------------------------------------------------
+-- 🌾 LÕI VÒNG LẶP AUTO FARM ĐÊM HOÀN HẢO CHU KỲ (LÀNG 1 -> CHÍNH)
+------------------------------------------------------------------------
+task.spawn(function()
+    local Lang1 = Vector3.new(-44.32, 32.00, 2715.94)
+    local Chinh = Vector3.new(-380.83, 55.50, 4942.56)
+    
+    while true do
+        task.wait(1)
+        if _G.AutoFarm then
+            -- Tự động bật kèm các tính năng bổ trợ để farm không chết
+            _G.KillAura = true
+            _G.AntiAFK = true
+            
+            -- Bước 1: Kiểm tra súng trước khi bắt đầu hành trình di chuyển
+            checkAndEquipWeapon()
+            
+            -- Bước 2: Bắt đầu bay Tween tới Làng 1 với tốc độ 250
+            if _G.AutoFarm then
+                tweenTo(Lang1, 250)
+            end
+            
+            -- Đứng im tại Làng 1 trong 30 giây để sấy Aura dọn quái
+            local secondsLeft = 30
+            while secondsLeft > 0 and _G.AutoFarm do
+                checkAndEquipWeapon() -- Đảm bảo luôn cầm súng trên tay xuyên suốt
+                task.wait(1)
+                secondsLeft = secondsLeft - 1
+            end
+            
+            -- Bước 3: Bay Tween từ Làng 1 tiến đến Tọa độ Làng Chính
+            if _G.AutoFarm then
+                tweenTo(Chinh, 250)
+            end
+            
+   
